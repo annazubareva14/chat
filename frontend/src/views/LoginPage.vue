@@ -1,50 +1,62 @@
 <template>
-  <div class="login__wrapper">
-    <div class="lonig__logo">
-      <img
-        alt="Vue logo"
-        class="logo"
-        src="@/assets/logo.svg"
-        width="125"
-        height="125"
+  <div v-if="isLoading">loading</div>
+  <LoginTemplate v-else text="Next" @onClick="goNext">
+    <template #inputs>
+      <input
+        v-model="userName"
+        type="input"
+        label="Username"
+        placeholder="Enter you name"
+        class="login__input"
       />
-    </div>
-    <input type="input" label="Username" class="login__input" />
-    <select name="room">
-      <option
-        v-for="room in chatRooms.chatRooms"
-        :key="room.id"
-        :value="room.name"
-      >
-        {{ room.name }}
-      </option>
-    </select>
-    <button class="login__btn">Join Chat</button>
-  </div>
+    </template>
+  </LoginTemplate>
 </template>
 
 <script setup>
+import LoginTemplate from "@/components/LoginTemplate.vue";
+import socket from "@/socket";
+
+import { useRouter } from "vue-router";
+import { ref, onUnmounted } from "vue";
+
 import { useChatRooms } from "@/stores/chatRooms";
 
+const router = useRouter();
 const chatRooms = useChatRooms();
 
-chatRooms.getChatRooms();
+const isLoading = ref(false);
+const userName = ref("");
+
+const goNext = () => {
+  chatRooms.selectUsername(userName.value);
+
+  socket.on("connect_error", (err) => {
+    if (err.message === "invalid username") {
+      isLoading.value = true;
+    }
+  });
+
+  router.push("/rooms");
+};
+
+onUnmounted(() => {
+  socket.off("connect_error");
+});
 </script>
 
 <style lang="scss">
 .login {
-  &__wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  &__input {
+  &__input,
+  &__select {
     margin-bottom: 20px;
-  }
-
-  &__btn {
+    width: 100%;
+    font-size: 40px;
     padding: 5px 10px;
-    cursor: pointer;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid #40b883;
+    color: #34495e;
   }
 }
 </style>

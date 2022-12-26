@@ -1,0 +1,7 @@
+{
+  "watch": ["."],
+  "ext": ".js",
+  "ignore": [],
+  "verbose": "true",
+  "exec": "node --inspect=0.0.0.0 ./app.js"
+}

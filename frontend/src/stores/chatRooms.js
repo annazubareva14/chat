@@ -1,10 +1,11 @@
 import { defineStore } from "pinia";
-// import { sockets } from '@/plugins/socket'
+import socket from "@/socket";
 
 export const useChatRooms = defineStore("chatRooms", {
   state: () => {
     return {
       chatRooms: [],
+      connected: false,
     };
   },
 
@@ -22,8 +23,13 @@ export const useChatRooms = defineStore("chatRooms", {
       }
     },
 
-    // joinRoom() {
-    //   socket.emit("joinRoom", { username, room });
-    // },
+    selectUsername(username) {
+      socket.auth = { username };
+      socket.connect();
+    },
+
+    joinRoom(username, room) {
+      socket.emit("joinRoom", { username, room });
+    },
   },
 });
