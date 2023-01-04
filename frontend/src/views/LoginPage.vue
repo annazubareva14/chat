@@ -1,11 +1,9 @@
 <template>
-  <div v-if="isLoading">loading</div>
-  <LoginTemplate v-else text="Next" @onClick="goNext">
+  <LoginTemplate text="Next" @onClick="goNext">
     <template #inputs>
       <input
-        v-model="userName"
+        v-model="name"
         type="input"
-        label="Username"
         placeholder="Enter you name"
         class="login__input"
       />
@@ -16,28 +14,26 @@
 <script setup>
 import LoginTemplate from "@/components/LoginTemplate.vue";
 import socket from "@/socket";
-
-import { useRouter } from "vue-router";
 import { ref, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
 
 import { useChatRooms } from "@/stores/chatRooms";
 
 const router = useRouter();
 const chatRooms = useChatRooms();
 
-const isLoading = ref(false);
-const userName = ref("");
+const name = ref("");
 
 const goNext = () => {
-  chatRooms.selectUsername(userName.value);
+  chatRooms.setUsername(name.value);
 
   socket.on("connect_error", (err) => {
     if (err.message === "invalid username") {
-      isLoading.value = true;
+      console.error(err.message);
     }
   });
 
-  router.push("/rooms");
+  router.push({ name: "rooms", params: { userName: name.value } });
 };
 
 onUnmounted(() => {

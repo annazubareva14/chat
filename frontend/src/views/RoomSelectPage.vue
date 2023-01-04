@@ -1,5 +1,5 @@
 <template>
-  <LoginTemplate text="Join Chat" @onClick="selectRoom">
+  <LoginTemplate text="Join Chat" @onClick="joinRoom">
     <template #inputs>
       <select
         v-model="selectedRoom"
@@ -22,19 +22,30 @@
 
 <script setup>
 import LoginTemplate from "@/components/LoginTemplate.vue";
+import socket from "@/socket";
 
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 
 import { useChatRooms } from "@/stores/chatRooms";
 
+//console.log(socket.auth.username);
+const router = useRouter();
 const chatRooms = useChatRooms();
 
 const selectedRoom = ref("");
 
 chatRooms.getChatRooms();
 
-const selectRoom = () => {
-  console.log(selectedRoom.value, "selectedRoom");
+const joinRoom = () => {
+  chatRooms.joinRoom({
+    username: socket.auth.username,
+    room: selectedRoom.value,
+  });
+  router.push({
+    name: "chat",
+    params: { room: selectedRoom.value },
+  });
 };
 </script>
 

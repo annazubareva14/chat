@@ -12,14 +12,16 @@ const props = defineProps({
 
 <style lang="scss">
 .button {
-  padding: 10px 20px;
+  padding: 15px 30px;
   width: 100%;
-  font-size: 30px;
+  font-size: 28px;
   background-color: #40b883;
   color: #fff;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
   border: 0;
-  border-radius: 5px;
+  border-radius: 10px;
+  font-weight: 500;
   cursor: pointer;
+  font-weight: 600;
 }
 </style>

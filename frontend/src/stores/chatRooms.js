@@ -1,19 +1,20 @@
 import { defineStore } from "pinia";
+import Api from "@/utils/api.js";
 import socket from "@/socket";
 
 export const useChatRooms = defineStore("chatRooms", {
   state: () => {
     return {
       chatRooms: [],
-      connected: false,
+      currentRoom: null,
+      users: [],
     };
   },
 
   actions: {
     async getChatRooms() {
       try {
-        const response = await fetch("http://localhost:3000/chatrooms");
-        const { chatRooms } = await response.json();
+        const { chatRooms } = await Api.get("chatrooms");
 
         if (chatRooms) {
           this.chatRooms = chatRooms;
@@ -23,13 +24,31 @@ export const useChatRooms = defineStore("chatRooms", {
       }
     },
 
-    selectUsername(username) {
+    setUsername(username) {
       socket.auth = { username };
       socket.connect();
     },
 
-    joinRoom(username, room) {
-      socket.emit("joinRoom", { username, room });
+    async joinRoom(userData) {
+      const { users } = await Api.post("chatrooms/join", userData);
+
+      this.users = users;
+    },
+
+    async getRoomInfo() {
+      const { currentRoom } = await Api.get("chatrooms/room");
+
+      // const response = await fetch(`http://localhost:3000/chatrooms/room`, {
+      //   method: "GET",
+      //   headers: {
+      //     "Content-Type": "application/json;charset=utf-8",
+      //   },
+      //   body: JSON.stringify(room) ?? null,
+      // });
+
+      // const { currentRoom } = await response.json();
+
+      this.currentRoom = currentRoom;
     },
   },
 });

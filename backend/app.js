@@ -2,7 +2,7 @@ const path = require("path");
 const http = require("http");
 const express = require("express");
 const formatMessage = require("./utils/messages");
-const { chatRooms } = require("./database/chatRooms");
+const chatRooms = require("./database/chatRooms");
 
 const app = express();
 const server = http.createServer(app);
@@ -14,21 +14,24 @@ const io = require("socket.io")(server, {
 });
 
 const {
-  userJoin,
-  getCurrentUser,
+  userJoined,
+  getUserData,
   userLeave,
   getRoomUsers,
 } = require("./utils/users");
 
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
+app.use(express.json());
+
 app.use(function (req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST,GET,DELETE");
+  res.setHeader("Access-Control-Allow-Methods", "POST,GET,DELETE,OPTIONS,PUT");
   res.setHeader(
     "Access-Control-Allow-Headers",
     "X-Requested-With,content-type"
   );
+  res.setHeader("Access-Control-Allow-Credentials", true);
   next();
 });
 
@@ -37,6 +40,23 @@ app.get("/chatrooms", (req, res) => {
   res.json(chatRooms);
 });
 
+app.post("/chatrooms/join", (req, res) => {
+  try {
+    console.log("i receive a POST request");
+    const user = req.body
+    userJoined(user);
+    res.status(200).json(getRoomUsers(user.room));
+  } catch (err) {
+    console.log(err);
+    res.status(400).send('Error');
+  }
+});
+
+app.get("/chatrooms/room", (req, res) => {
+  const user = req.body;
+  res.status(200).json(getRoomUsers(user.room));
+})
+
 io.use((socket, next) => {
   const username = socket.handshake.auth.username;
   if (!username) {
@@ -44,6 +64,32 @@ io.use((socket, next) => {
   }
   socket.username = username;
   next();
+});
+
+io.on("connection", (socket) => {
+  //const user = userJoined({ userID: socket.id, username: socket.username, room: null });
+  // users.forEach((user) => {
+  //   socket.emit("joinRoom", { ...user, room });
+  // });
+  // socket.on("joinRoom", ({ userID, username, room }) => {
+  //   const user = userJoin(userID, username, room);
+  //   socket.join(user.room);
+  //   console.log(socket);
+  // Welcome current user
+  // socket.emit("message", formatMessage(botName, "Welcome to ChatCord!"));
+  // // Broadcast when a user connects
+  // socket.broadcast
+  //   .to(user.room)
+  //   .emit(
+  //     "message",
+  //     formatMessage(botName, `${user.username} has joined the chat`)
+  //   );
+  // // Send users and room info
+  // io.to(user.room).emit("roomUsers", {
+  //   room: user.room,
+  //   users: getRoomUsers(user.room),
+  // });
+  // });
 });
 
 // io.on("connection", (socket) => {

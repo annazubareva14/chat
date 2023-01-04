@@ -1,17 +1,28 @@
-const users = [];
+const { faker } = require('@faker-js/faker');
+
+const users = new Map();
 
 // Join user to chat
-function userJoin(id, username, room) {
-  const user = { id, username, room };
+function userJoined({ username, room }) {
+  const user = { userID: faker.datatype.uuid(), username, room };
 
-  users.push(user);
+  users.set(user.userID, user);
 
-  return user;
+  return users;
 }
 
 // Get current user
-function getCurrentUser(id) {
-  return users.find((user) => user.id === id);
+function getUserData(userID) {
+  return users.get(userID);
+}
+
+// Get users in room
+function getRoomUsers(room) {
+  return new Map(
+    [...users].filter((user) => {
+      user.room === room;
+    })
+  );
 }
 
 // User leaves chat
@@ -23,14 +34,9 @@ function userLeave(id) {
   }
 }
 
-// Get room users
-function getRoomUsers(room) {
-  return users.filter((user) => user.room === room);
-}
-
 module.exports = {
-  userJoin,
-  getCurrentUser,
+  userJoined,
+  getUserData,
   userLeave,
   getRoomUsers,
 };
