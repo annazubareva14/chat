@@ -3,16 +3,27 @@
     <div class="sidebar__content">
       <div class="sidebar__rooms">
         <h2>Room name</h2>
-        <div class="sidebar__rooms__item">title</div>
+        <div class="sidebar__rooms__item">{{ roomName }}</div>
       </div>
       <div class="sidebar__users">
         <h2>Users</h2>
-        <div class="sidebar__users__item">user1</div>
-        <div class="sidebar__users__item">user2</div>
+        <div
+          v-for="user in users"
+          :key="user.userID"
+          class="sidebar__users__item"
+        >
+          {{ user.username }}
+        </div>
       </div>
     </div>
   </div>
 </template>
+<script setup>
+const props = defineProps({
+  roomName: String,
+  users: Array,
+});
+</script>
 
 <style lang="scss">
 .sidebar {

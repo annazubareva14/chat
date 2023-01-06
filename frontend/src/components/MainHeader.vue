@@ -4,7 +4,7 @@
       <img alt="Vue logo" src="@/assets/logo.svg" width="85" height="85" />
     </div>
     <div class="header__buttons">
-      <MainButton text="Leave Room" />
+      <MainButton text="Leave Room" @onClick="$emit('leave')" />
     </div>
   </div>
 </template>

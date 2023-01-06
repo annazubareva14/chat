@@ -35,18 +35,8 @@ export const useChatRooms = defineStore("chatRooms", {
       this.users = users;
     },
 
-    async getRoomInfo() {
-      const { currentRoom } = await Api.get("chatrooms/room");
-
-      // const response = await fetch(`http://localhost:3000/chatrooms/room`, {
-      //   method: "GET",
-      //   headers: {
-      //     "Content-Type": "application/json;charset=utf-8",
-      //   },
-      //   body: JSON.stringify(room) ?? null,
-      // });
-
-      // const { currentRoom } = await response.json();
+    async getRoomInfo(room) {
+      const currentRoom = await Api.getWithParams(`chatrooms/${room}`);
 
       this.currentRoom = currentRoom;
     },

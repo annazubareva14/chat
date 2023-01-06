@@ -17,12 +17,17 @@ function getUserData(userID) {
 }
 
 // Get users in room
-function getRoomUsers(room) {
-  return new Map(
-    [...users].filter((user) => {
-      user.room === room;
+function getRoomUsers(roomName) {
+  // console.log(users, 'users');
+  // console.log(roomName, 'room');
+  const roomUsers = new Map(
+    [...users].filter(([key, value]) => {
+      value.room === roomName;
     })
   );
+  // console.log(roomUsers, 'roomUsers');
+
+  return users;
 }
 
 // User leaves chat

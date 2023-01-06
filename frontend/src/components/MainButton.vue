@@ -15,7 +15,9 @@ const props = defineProps({
   padding: 15px 30px;
   width: 100%;
   font-size: 28px;
-  background-color: #40b883;
+  //background-color: #40b883;
+  background: linear-gradient(135deg, #48ce93 25%, #2fa2e4);
+  background-attachment: fixed;
   color: #fff;
   /* text-transform: uppercase; */
   border: 0;

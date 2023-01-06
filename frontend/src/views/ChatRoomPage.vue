@@ -1,8 +1,8 @@
 <template>
   <div class="chat-page__wrapper">
-    <MainHeader />
+    <MainHeader @leave="leaveRoom" />
     <div class="chat-page__content">
-      <SidebarMenu />
+      <SidebarMenu :room-name="currentRoom?.name" :users="currentRoom?.users" />
       <div class="chat-page__chat">
         <ChatWindow />
         <ChatInput />
@@ -18,6 +18,8 @@ import ChatWindow from "@/components/ChatWindow.vue";
 import ChatInput from "@/components/ChatInput.vue";
 
 import socket from "@/socket";
+import { ref, computed } from "vue";
+import { storeToRefs } from "pinia";
 import { useRouter, useRoute } from "vue-router";
 import { useChatRooms } from "@/stores/chatRooms";
 
@@ -25,9 +27,22 @@ const router = useRouter();
 const route = useRoute();
 const chatRooms = useChatRooms();
 
-console.log(route.params.room);
+const { currentRoom } = storeToRefs(useChatRooms());
 
-chatRooms.getRoomInfo();
+const roomName = route.params.room;
+
+const currentUser = computed(() => {
+  return currentRoom?.value.users.find(
+    (user) => user.username === socket?.auth?.username
+  );
+});
+
+chatRooms.getRoomInfo(roomName);
+socket.emit("getRoomUsers", roomName);
+
+const leaveRoom = () => {
+  router.push("/");
+};
 </script>
 
 <style lang="scss">

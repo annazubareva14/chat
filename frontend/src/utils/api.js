@@ -7,6 +7,14 @@ export default class Api {
     return await response.json();
   }
 
+  static async getWithParams(url, params) {
+    const response = await fetch(
+      `${BASE_URL}/${url}?${new URLSearchParams(params)}`
+    );
+
+    return await response.json();
+  }
+
   static async post(url, body) {
     const response = await fetch(`${BASE_URL}/${url}`, {
       method: "POST",

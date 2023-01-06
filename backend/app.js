@@ -36,26 +36,36 @@ app.use(function (req, res, next) {
 });
 
 app.get("/chatrooms", (req, res) => {
-  console.log("i receive a GET request");
   res.json(chatRooms);
 });
 
 app.post("/chatrooms/join", (req, res) => {
   try {
-    console.log("i receive a POST request");
-    const user = req.body
+    const user = req.body;
     userJoined(user);
-    res.status(200).json(getRoomUsers(user.room));
+    res.status(200).send();
   } catch (err) {
     console.log(err);
-    res.status(400).send('Error');
+    res.status(400).send("Error");
   }
 });
 
-app.get("/chatrooms/room", (req, res) => {
-  const user = req.body;
-  res.status(200).json(getRoomUsers(user.room));
-})
+app.get("/chatrooms/:room", (req, res) => {
+  const roomName = req.params.room;
+  console.log(roomName, "roomName");
+  const users = Object.values(Object.fromEntries(getRoomUsers(roomName)));
+
+  const currentRoom = {
+    name: roomName,
+    users: users,
+  };
+
+
+  console.log(users);
+  console.log(currentRoom);
+
+  res.status(200).json(currentRoom);
+});
 
 io.use((socket, next) => {
   const username = socket.handshake.auth.username;
@@ -67,29 +77,11 @@ io.use((socket, next) => {
 });
 
 io.on("connection", (socket) => {
-  //const user = userJoined({ userID: socket.id, username: socket.username, room: null });
-  // users.forEach((user) => {
-  //   socket.emit("joinRoom", { ...user, room });
-  // });
-  // socket.on("joinRoom", ({ userID, username, room }) => {
-  //   const user = userJoin(userID, username, room);
-  //   socket.join(user.room);
-  //   console.log(socket);
-  // Welcome current user
-  // socket.emit("message", formatMessage(botName, "Welcome to ChatCord!"));
-  // // Broadcast when a user connects
-  // socket.broadcast
-  //   .to(user.room)
-  //   .emit(
-  //     "message",
-  //     formatMessage(botName, `${user.username} has joined the chat`)
-  //   );
-  // // Send users and room info
-  // io.to(user.room).emit("roomUsers", {
-  //   room: user.room,
-  //   users: getRoomUsers(user.room),
-  // });
-  // });
+  socket.on("getRoomUsers", (roomName) => {
+    const currentRoom = getRoomUsers(roomName);
+
+    socket.join(currentRoom);
+  });
 });
 
 // io.on("connection", (socket) => {
