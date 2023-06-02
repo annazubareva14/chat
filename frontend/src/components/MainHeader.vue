@@ -1,6 +1,6 @@
 <template>
   <div class="header__wrapper">
-    <div class="header__logo">
+    <div class="header__logo" @click="goToStart">
       <img alt="Vue logo" src="@/assets/logo.svg" width="85" height="85" />
     </div>
     <div class="header__buttons">
@@ -11,6 +11,13 @@
 
 <script setup>
 import MainButton from "@/components/MainButton.vue";
+
+import { useRouter } from "vue-router";
+const router = useRouter();
+
+const goToStart = () => {
+  router.push("/");
+};
 </script>
 
 <style lang="scss">
@@ -22,6 +29,10 @@ import MainButton from "@/components/MainButton.vue";
     padding: 5px 20px;
     height: 100px;
     border-bottom: 2px solid #e7e7e7;
+  }
+
+  &__logo {
+    cursor: pointer;
   }
 
   &__btn {

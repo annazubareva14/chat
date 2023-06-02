@@ -24,24 +24,30 @@
 import LoginTemplate from "@/components/LoginTemplate.vue";
 import socket from "@/socket";
 
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 import { useChatRooms } from "@/stores/chatRooms";
 
-//console.log(socket.auth.username);
 const router = useRouter();
 const chatRooms = useChatRooms();
 
 const selectedRoom = ref("");
 
-chatRooms.getChatRooms();
+onMounted(async () => {
+  await chatRooms.getChatRooms();
+});
 
-const joinRoom = () => {
-  chatRooms.joinRoom({
-    username: socket.auth.username,
-    room: selectedRoom.value,
-  });
+const joinRoom = async () => {
+  if (selectedRoom.value.length) {
+    await chatRooms.joinRoom({
+      username: socket.auth.username,
+      room: selectedRoom.value,
+      userId: socket.auth.userId,
+      socketId: socket.id,
+    });
+  }
+
   router.push({
     name: "chat",
     params: { room: selectedRoom.value },

@@ -1,15 +1,43 @@
 <template>
   <div class="bottom-bar">
     <div class="chat-input__wpapper">
-      <input class="chat-input" type="text" placeholder="Type a message..." />
-      <button class="chat-button" type="submit">
+      <input
+        v-model="preparedText"
+        class="chat-input"
+        type="text"
+        ref="input"
+        placeholder="Type a message..."
+      />
+      <button class="chat-button" type="submit" @click="sendMessage">
         <font-awesome-icon icon="paper-plane" />
       </button>
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref, computed } from "vue";
+
+const props = defineProps({
+  newText: String,
+});
+
+const emit = defineEmits(["send"]);
+
+const text = ref("");
+const preparedText = computed({
+  get() {
+    return text.value;
+  },
+  set(val) {
+    text.value = val;
+  },
+});
+
+const sendMessage = () => {
+  emit("send", text.value);
+};
+</script>
 
 <style lang="scss">
 .chat-input {

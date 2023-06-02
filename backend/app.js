@@ -1,8 +1,16 @@
 const path = require("path");
 const http = require("http");
 const express = require("express");
-const formatMessage = require("./utils/messages");
 const chatRooms = require("./database/chatRooms");
+
+const { getRoomMessages, sendMessage } = require("./utils/messages");
+const {
+  userJoined,
+  getUserData,
+  leaveRoom,
+  getRoomUsers,
+} = require("./utils/users");
+
 
 const app = express();
 const server = http.createServer(app);
@@ -12,13 +20,6 @@ const io = require("socket.io")(server, {
     origin: "*",
   },
 });
-
-const {
-  userJoined,
-  getUserData,
-  userLeave,
-  getRoomUsers,
-} = require("./utils/users");
 
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
@@ -39,11 +40,16 @@ app.get("/chatrooms", (req, res) => {
   res.json(chatRooms);
 });
 
+//users
+
 app.post("/chatrooms/join", (req, res) => {
   try {
     const user = req.body;
-    userJoined(user);
-    res.status(200).send();
+    const users = userJoined(user);
+    const userSocket = io.of("/").sockets.get(user.socketId);
+    userSocket.join(user.room);
+    io.to(user.room).emit("onUsersUpdate", Array.from(users.values()));
+    res.status(200).send({});
   } catch (err) {
     console.log(err);
     res.status(400).send("Error");
@@ -52,20 +58,36 @@ app.post("/chatrooms/join", (req, res) => {
 
 app.get("/chatrooms/:room", (req, res) => {
   const roomName = req.params.room;
-  console.log(roomName, "roomName");
-  const users = Object.values(Object.fromEntries(getRoomUsers(roomName)));
+  const users = getRoomUsers(roomName);
+  const messages = getRoomMessages(roomName)
 
   const currentRoom = {
     name: roomName,
-    users: users,
+    users,
+    messages
   };
-
-
-  console.log(users);
-  console.log(currentRoom);
-
+  //io.emit("onUsersUpdate", Array.from(users.values()))
   res.status(200).json(currentRoom);
 });
+
+app.post("/chatrooms/leave", (req, res) => {
+  const userId = req.body.userId;
+  const user = getUserData(userId);
+  const userSocket = io.of("/").sockets.get(user.socketId);
+  userSocket.leave(user.room);
+  const { users, room } = leaveRoom(userId);
+  io.to(room).emit("onUsersUpdate", Array.from(users.values()));
+  res.status(200).send({});
+});
+
+//messages
+app.post("/chatrooms/:room", (req, res) => {
+  const message = req.body;
+  sendMessage(message)
+  io.to(message.room).emit("onMessageSent", message);
+  res.status(201).send({});
+}) 
+
 
 io.use((socket, next) => {
   const username = socket.handshake.auth.username;
@@ -76,13 +98,9 @@ io.use((socket, next) => {
   next();
 });
 
-io.on("connection", (socket) => {
-  socket.on("getRoomUsers", (roomName) => {
-    const currentRoom = getRoomUsers(roomName);
 
-    socket.join(currentRoom);
-  });
-});
+
+io.on("connection", (socket) => {});
 
 // io.on("connection", (socket) => {
 //   console.log(io.of("/").adapter);

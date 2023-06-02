@@ -7,13 +7,16 @@
         placeholder="Enter you name"
         class="login__input"
       />
+      <MainButton text="Generate Name" @onClick="generateName" />
     </template>
   </LoginTemplate>
 </template>
 
 <script setup>
 import LoginTemplate from "@/components/LoginTemplate.vue";
+import MainButton from "@/components/MainButton.vue";
 import socket from "@/socket";
+import { faker } from "@faker-js/faker";
 import { ref, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 
@@ -25,7 +28,11 @@ const chatRooms = useChatRooms();
 const name = ref("");
 
 const goNext = () => {
-  chatRooms.setUsername(name.value);
+  chatRooms.setUsername({
+    username: name.value,
+    userId: faker.datatype.uuid(),
+    socketId: socket.id,
+  });
 
   socket.on("connect_error", (err) => {
     if (err.message === "invalid username") {
@@ -34,6 +41,10 @@ const goNext = () => {
   });
 
   router.push({ name: "rooms", params: { userName: name.value } });
+};
+
+const generateName = () => {
+  name.value = faker.name.firstName();
 };
 
 onUnmounted(() => {

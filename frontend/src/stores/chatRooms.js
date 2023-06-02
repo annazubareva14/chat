@@ -7,8 +7,14 @@ export const useChatRooms = defineStore("chatRooms", {
     return {
       chatRooms: [],
       currentRoom: null,
-      users: [],
     };
+  },
+
+  getters: {
+    currentUser: () => ({
+      username: socket?.auth?.username,
+      userId: socket?.auth?.userId,
+    }),
   },
 
   actions: {
@@ -24,8 +30,8 @@ export const useChatRooms = defineStore("chatRooms", {
       }
     },
 
-    setUsername(username) {
-      socket.auth = { username };
+    setUsername({ username, userId }) {
+      socket.auth = { username, userId };
       socket.connect();
     },
 
@@ -38,7 +44,34 @@ export const useChatRooms = defineStore("chatRooms", {
     async getRoomInfo(room) {
       const currentRoom = await Api.getWithParams(`chatrooms/${room}`);
 
+      console.log(currentRoom, "currentRoom");
+
       this.currentRoom = currentRoom;
+    },
+
+    updateUserList(users) {
+      this.currentRoom.users = users;
+    },
+
+    async leaveRoom() {
+      const { users } = await Api.post("chatrooms/leave", {
+        userId: this.currentUser.userId,
+      });
+
+      this.users = users;
+    },
+
+    async sendMessage(message) {
+      console.log(message, "message");
+      const messages = await Api.post(`chatrooms/${message.room}`, message);
+
+      console.log(messages, "messages");
+
+      this.currentRoom.messages = messages;
+    },
+
+    updateMessagesList(message) {
+      this.currentRoom.messages.push(message);
     },
   },
 });

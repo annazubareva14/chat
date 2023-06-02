@@ -1,6 +1,7 @@
 <template>
   <div class="sidebar">
     <div class="sidebar__content">
+      <div>{{ currentUser?.username }}</div>
       <div class="sidebar__rooms">
         <h2>Room name</h2>
         <div class="sidebar__rooms__item">{{ roomName }}</div>
@@ -9,7 +10,7 @@
         <h2>Users</h2>
         <div
           v-for="user in users"
-          :key="user.userID"
+          :key="user.userId"
           class="sidebar__users__item"
         >
           {{ user.username }}
@@ -22,6 +23,7 @@
 const props = defineProps({
   roomName: String,
   users: Array,
+  currentUser: Object
 });
 </script>
 

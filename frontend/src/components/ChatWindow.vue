@@ -1,23 +1,52 @@
 <template>
   <div class="chat-window__wrapper">
-    <div class="send messages">
-      <div class="message">Dude</div>
-    </div>
-    <div class="receive messages">
-      <div class="message">Hey!</div>
-      <div class="message">You there?</div>
-      <div class="message">Hello, how's it going?</div>
-    </div>
-    <div class="send messages">
-      <div class="message">Great thanks!</div>
-      <div class="message">How about you?</div>
+    <div
+      v-for="(message, index) in messages"
+      :key="message.time + message.username"
+      :class="[currentClass(message.class, index), 'messages']"
+    >
+      <div v-if="isNameVisible(message.username, index)" class="username">
+        {{ message.username }}
+      </div>
+      <div class="message">
+        {{ message.text }}
+        <span class="message__time">{{ formatedDate(message.time) }}</span>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import moment from "moment";
 
-<style lang="scss">
+const props = defineProps({
+  messages: Array,
+  currentUser: String,
+});
+
+const currentClass = (currentClass, index) => {
+  const classes = [];
+  classes.push(currentClass);
+  currentClass !== props.messages[index + 1]?.class
+    ? classes.push("last")
+    : null;
+  return classes;
+};
+
+const isNameVisible = (username, index) => {
+  return index === 0 ? true : username === props.messages[index - 1]?.username;
+};
+
+const formatedDate = (date) => {
+  const isToday = moment(date).isSame(new Date(), "day");
+
+  return isToday
+    ? moment(date).format("HH:mm")
+    : moment(date).format("DD.MM HH:mm");
+};
+</script>
+
+<style lang="scss" scoped>
 .chat-window {
   &__wrapper {
     display: flex;
@@ -28,9 +57,12 @@
 }
 
 .messages {
-  margin-top: 30px;
   display: flex;
   flex-direction: column;
+}
+
+.last {
+  margin-bottom: 30px;
 }
 
 .message {
@@ -39,9 +71,16 @@
   font-size: 24px;
   border-radius: 20px;
   padding: 8px 15px;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   display: inline-block;
+
+  &__time {
+    position: absolute;
+    bottom: 4px;
+    right: 10px;
+    font-size: 16px;
+    color: #818181;
+  }
 }
 
 .receive {
@@ -79,6 +118,9 @@
 
 .send {
   align-items: flex-end;
+}
+.send .username {
+  float: right;
 }
 
 .send .message {

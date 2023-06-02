@@ -1,15 +1,15 @@
 module.exports = {
   chatRooms: [
     {
-      name: "first",
+      name: "Monday",
       id: "1",
     },
     {
-      name: "second",
+      name: "Friday",
       id: "2",
     },
     {
-      name: "third",
+      name: "Saturday",
       id: "3",
     },
   ],
